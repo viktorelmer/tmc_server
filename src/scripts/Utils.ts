@@ -4,10 +4,11 @@ import bcrypt from 'bcrypt'
 
 export const Utils = {
 
-    response: (res: Response, data: RESPONSE_DATA, code: RESP_STATUSES) => {
+    response: (res: Response, data: RESPONSE_DATA, code: RESP_STATUSES, errorCode: 0 | 1) => {
         let response: RESPONSE_B_TYPE = {
             status: code,
-            data: data
+            data: data,
+            code: errorCode
         }
         res.send(response)
     },
@@ -23,7 +24,7 @@ export const Utils = {
     comparePass: (pass: string, hashPass: string, cb: Function) => {
         bcrypt.compare(pass, hashPass, function(err, isMatch) {
             if (err) return cb(false)
-            return(isMatch)
+            return cb(isMatch)
         })
     }
 }
