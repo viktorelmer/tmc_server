@@ -2,7 +2,7 @@ import {Connection, getMongoRepository} from "typeorm";
 import {Application} from "express";
 
 import {UserModel} from "../models/UserModel";
-import {ADD_USER, GET_TOKEN, GET_USER_DATA, LOGIN_USER} from "../mConstants";
+import {ADD_USER, CHECK_TOKEN, GET_TOKEN, GET_USER_DATA, LOGIN_USER} from "../mConstants";
 import {Utils} from "../scripts/Utils";
 import * as crypto from "crypto";
 
@@ -15,6 +15,16 @@ type UserProps = {
 const User = (({app, connection}: UserProps) => {
     const USER_URL = '/user/',
         userRepos = getMongoRepository(UserModel)
+
+    async function checkToken(req, res) {
+        const {user_id, token} = req.body
+        const user = await getUserData(user_id)
+        if (token === user.token) {
+            Utils.response(res, [{valid: true}], 200, 0)
+            return;
+        }
+        Utils.response(res, [{message: "Ошибка, не верный токен"}], 200, 1)
+    }
 
     async function getUserData(user_id?: string, username?: string) {
         let result
@@ -70,6 +80,8 @@ const User = (({app, connection}: UserProps) => {
     async function loginUser(req, res) {
         const {username} = req.body
         const findedData = await getUserData(null, username)
+        console.log(req.body, req.body)
+        console.log(findedData)
 
         if (findedData.length > 0) {
             const {password} = findedData[0]
@@ -101,10 +113,16 @@ const User = (({app, connection}: UserProps) => {
      */
     app.post(USER_URL + GET_TOKEN, getToken)
     /**
-     * /user/getToken
+     * /user/loginUser
      * user_id {string}
      */
     app.post(USER_URL + LOGIN_USER, loginUser)
+    /**
+     * /user/checkToken
+     * user_id {string}
+     * token {string}
+     */
+    app.post(USER_URL + CHECK_TOKEN, checkToken)
 
 })
 

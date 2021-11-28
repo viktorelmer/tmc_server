@@ -9,11 +9,18 @@ import {loadUserSchema} from "./schemas/User";
 const app = express();
 
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.urlencoded({extended: true}))
 app.use(cors())
+
 
 let connection: Connection
 
+app.options('*', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Add other headers here
+    res.setHeader('Access-Control-Allow-Methods', 'POST'); // Add other methods here
+    res.send();
+});
 
 async function loadConnection() {
     try {
